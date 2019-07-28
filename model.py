@@ -5,7 +5,7 @@ from scipy.spatial.transform import Rotation
 class Drone:
 
     def __init__(self, time, position = np.zeros(3), principal_moments = np.ones(3),
-            arm_length = 1, motor_torque_thrust_const = 1):
+            arm_length = 1, motor_torque_thrust_const = 1, mass = 1):
 
         self.time = 0
         self.ang_vel = np.zeros(3)
@@ -16,6 +16,7 @@ class Drone:
         self.a = arm_length
         self.alpha = motor_torque_thrust_const
         self.principal_moments = principal_moments
+        self.mass = 1
 
     def make_state_vector(self):
 
@@ -50,12 +51,19 @@ class Drone:
                 [ x[5], -x[4],     0, x[6]]
                 [-x[4], -x[5], -x[6],    0]
             ])
+            orientation = Rotation(x[7:11])
+            net_force = orientation.apply([0, 0, self.alpha * np.sum(x[0:4])])
             return np.array([
                 0, 0, 0, 0,                                               # Motor torque derivatives
                 (x[1] - x[3])*c/self.principal_moments[0],                # Angular accel x
                 (x[2] - x[0])*c/self.principal_moments[1],                # Angular accel y
-                (x[0] + x[2] - x[1] - x[3])/self.principal_moments[2],    # Angular accel z
-                0.5 * ()
-            ])
+                (x[0] + x[2] - x[1] - x[3])/self.principal_moments[2]     # Angular accel z
+                ] + (0.5 * ang_vel_mat @ orientation.as_quat())           # Quaternion derivative
+                  + net_force / self.mass                                 # Acceleration
+            )
+
+        result = solve_ivp(state_deriv, (self.time, self.time + time_step), self.make_state_vector())
+        self.save_state_vector(result.y)
+        self.time += time_step
     
 
