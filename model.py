@@ -46,9 +46,9 @@ class Drone:
         def state_deriv(t, x):
             c = self.a * self.alpha
             ang_vel_mat = np.array([
-                [    0,  x[6], -x[5], x[4]]
-                [-x[6],     0,  x[4], x[5]]
-                [ x[5], -x[4],     0, x[6]]
+                [    0,  x[6], -x[5], x[4]],
+                [-x[6],     0,  x[4], x[5]],
+                [ x[5], -x[4],     0, x[6]],
                 [-x[4], -x[5], -x[6],    0]
             ])
             orientation = Rotation(x[7:11])
