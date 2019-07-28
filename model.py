@@ -38,10 +38,10 @@ class Drone:
         self.orientation.from_quat(state[7:11])
         self.vel = state[11:]
 
-    def step(self, time_step, motor_torques):
+    def step(self, next_time, motor_torques):
 
         self.motor_torques = motor_torques
-        self.position = self.position + (self.vel * time_step)
+        self.position = self.position + (self.vel * (next_time - self.time))
 
         def state_deriv(t, x):
             c = self.a * self.alpha
@@ -58,12 +58,23 @@ class Drone:
                 (x[1] - x[3])*c/self.principal_moments[0],                # Angular accel x
                 (x[2] - x[0])*c/self.principal_moments[1],                # Angular accel y
                 (x[0] + x[2] - x[1] - x[3])/self.principal_moments[2]     # Angular accel z
-                ] + (0.5 * ang_vel_mat @ orientation.as_quat())           # Quaternion derivative
-                  + net_force / self.mass                                 # Acceleration
+                ] + list(0.5 * ang_vel_mat @ orientation.as_quat())           # Quaternion derivative
+                  + list([0, 0, -9.8] + net_force/self.mass)                  # Acceleration
             )
 
-        result = solve_ivp(state_deriv, (self.time, self.time + time_step), self.make_state_vector())
-        self.save_state_vector(result.y)
-        self.time += time_step
+        result = solve_ivp(state_deriv, (self.time, next_time), self.make_state_vector())
+        self.save_state_vector(result.y[:,-1])
+        self.time = next_time
     
+    def motor_pos(self, motor_num):
 
+        if (motor_num == 0):
+            return self.position + [self.a, 0, 0]
+        if (motor_num == 1):
+            return self.position + [0, self.a, 0]
+        if (motor_num == 2):
+            return self.position + [-self.a, 0, 0]
+        if (motor_num == 3):
+            return self.position + [0, -self.a, 0]
+        else:
+            raise ValueError("No such motor number: " + motor_num)
