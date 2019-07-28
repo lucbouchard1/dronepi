@@ -10,13 +10,17 @@ class Drone:
         self.time = 0
         self.ang_vel = np.zeros(3)
         self.orientation = Rotation.from_quat([0, 0, 0, 1])
-        self.vel = np.zeros(3)
+        self.velocity = np.zeros(3)
         self.motor_torques = np.zeros(3)
         self.position = position
         self.a = arm_length
         self.alpha = motor_torque_thrust_const
         self.principal_moments = principal_moments
         self.mass = 1
+
+    @property
+    def velocity_body(self):
+        return self.orientation.apply(self.velocity)
 
     def make_state_vector(self):
 
@@ -27,7 +31,7 @@ class Drone:
              self.motor_torques[0], self.motor_torques[1], self.motor_torques[2], self.motor_torques[3],
              self.ang_vel[0], self.ang_vel[1], self.ang_vel[2],
              quat[0], quat[1], quat[2], quat[3],
-             self.vel[0], self.vel[1], self.vel[2]
+             self.velocity[0], self.velocity[1], self.velocity[2]
             ]
         )
 
@@ -36,15 +40,15 @@ class Drone:
         self.motor_torques = state[0:4]
         self.ang_vel = state[4:7]
         self.orientation.from_quat(state[7:11])
-        self.vel = state[11:]
+        self.velocity = state[11:]
 
     def step(self, next_time, motor_torques):
 
-        if (np.any(motor_torques > 0)):
-            raise ValueError('Motor Torques must be positive: ' + str(motor_torques))
+        #if (np.any(motor_torques > 0)):
+        #    raise ValueError('Motor Torques must be positive: ' + str(motor_torques))
 
         self.motor_torques = motor_torques
-        self.position = self.position + (self.vel * (next_time - self.time))
+        self.position = self.position + (self.velocity * (next_time - self.time))
 
         def state_deriv(t, x):
             c = self.a * self.alpha
