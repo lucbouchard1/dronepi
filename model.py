@@ -40,6 +40,9 @@ class Drone:
 
     def step(self, next_time, motor_torques):
 
+        if (np.any(motor_torques > 0)):
+            raise ValueError('Motor Torques must be positive: ' + str(motor_torques))
+
         self.motor_torques = motor_torques
         self.position = self.position + (self.vel * (next_time - self.time))
 
