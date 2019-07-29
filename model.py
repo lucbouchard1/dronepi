@@ -7,7 +7,7 @@ class Drone:
     def __init__(self, time, position = np.zeros(3), principal_moments = np.ones(3),
             arm_length = 1, motor_torque_thrust_const = 1, mass = 1):
 
-        self.time = 0
+        self.time = time
         self.ang_vel = np.zeros(3)
         self.orientation = Rotation.from_quat([0, 0, 0, 1])
         self.velocity = np.zeros(3)
