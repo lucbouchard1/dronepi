@@ -26,9 +26,10 @@ class DroneController:
         y_ctl = self.get_ctrl_val(err[1], self.y_error, self.y_gains)
         z_ctl = self.get_ctrl_val(err[2], self.z_error, self.z_gains)
 
+        k = 7
         return np.array([
-            z_ctl - x_ctl,
-            z_ctl - y_ctl,
-            z_ctl + x_ctl,
-            z_ctl + y_ctl,
+            z_ctl - x_ctl + (k*self.drone.ang_vel[1]),
+            z_ctl - y_ctl - (k*self.drone.ang_vel[0]),
+            z_ctl + x_ctl - (k*self.drone.ang_vel[1]),
+            z_ctl + y_ctl + (k*self.drone.ang_vel[0]),
         ])
