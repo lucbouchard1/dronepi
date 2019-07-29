@@ -7,8 +7,9 @@ import matplotlib.animation as animation
 torques = np.zeros(4)
 last_i = -1
 drone = model.Drone(time = 0)
-controller = controller.DroneController(drone, x_gains=[0.3, 0.1, 0.5],
-        y_gains=[0.3, 0.1, 0.5], z_gains=[0.15, 0.3, 0.8])
+gains = np.array([0.15, 0.3, 0.8])
+controller = controller.DroneController(drone, x_gains=0.25*gains,
+        y_gains=0.25*gains, z_gains=gains)
 
 fig = plt.figure()
 ax = p3.Axes3D(fig)

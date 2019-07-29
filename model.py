@@ -4,7 +4,7 @@ from scipy.spatial.transform import Rotation
 
 class Drone:
 
-    def __init__(self, time, position = np.zeros(3), principal_moments = np.ones(3),
+    def __init__(self, time, position = np.zeros(3), principal_moments = 1*np.ones(3),
             arm_length = 1, motor_torque_thrust_const = 1, mass = 1):
 
         self.time = time
@@ -39,7 +39,7 @@ class Drone:
 
         self.motor_torques = state[0:4]
         self.ang_vel = state[4:7]
-        self.orientation.from_quat(state[7:11])
+        self.orientation = Rotation.from_quat(state[7:11])
         self.velocity = state[11:]
 
     def step(self, next_time, motor_torques):
@@ -76,12 +76,12 @@ class Drone:
     def motor_pos(self, motor_num):
 
         if (motor_num == 0):
-            return self.position + [self.a, 0, 0]
+            return self.position + self.orientation.apply([self.a, 0, 0])
         if (motor_num == 1):
-            return self.position + [0, self.a, 0]
+            return self.position + self.orientation.apply([0, self.a, 0])
         if (motor_num == 2):
-            return self.position + [-self.a, 0, 0]
+            return self.position + self.orientation.apply([-self.a, 0, 0])
         if (motor_num == 3):
-            return self.position + [0, -self.a, 0]
+            return self.position + self.orientation.apply([0, -self.a, 0])
         else:
             raise ValueError("No such motor number: " + motor_num)
