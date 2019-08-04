@@ -1,6 +1,11 @@
 from ctypes import Structure, c_uint32, c_int16, c_uint8
-import ctypes
-import os
+import matplotlib.pyplot as plt
+import ctypes, os
+
+fig = plt.figure()
+b = plt.bar([0, 1], [0, 0])
+plt.ylim(-30000, 30000)
+fig.show()
 
 class JoystickEvent(Structure):
     _fields_ = [("time", c_uint32),
@@ -9,10 +14,15 @@ class JoystickEvent(Structure):
                 ("number", c_uint8)]
 
 
-fd = os.open("/dev/input/js0", os.O_RDONLY)
-while 1:
-    data = os.read(fd, ctypes.sizeof(JoystickEvent))
+fd = os.open("/dev/input/js0", os.O_RDONLY | os.O_NONBLOCK)
+while plt.get_fignums():
+    plt.pause(0.00005)
+    try:
+        data = os.read(fd, ctypes.sizeof(JoystickEvent))
+    except:
+        continue
     event = JoystickEvent.from_buffer_copy(data)
-    print('\r', end='')
-    print('Event at', event.time, 'type', event.type, 'number',
-        event.number, 'value', event.value, end='                   ', flush=True)
+    if (event.number == 0):
+        b[0].set_height(event.value)
+    if (event.number == 1):
+        b[1].set_height(event.value)
