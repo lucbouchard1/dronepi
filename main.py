@@ -11,7 +11,7 @@ cmd_vel = np.zeros(3)
 drone = model.Drone(time = 0)
 gains = np.array([3, 0.2, 0.05])
 controller = controller.DroneController(drone, x_gains=0.1*gains,
-        y_gains=0.1*gains, z_gains=[0.15, 0.3, 0.8])
+        y_gains=0.1*gains, z_gains=[0.2, 0.4, 1])
 
 fig = plt.figure(figsize=(15, 9))
 ax = p3.Axes3D(fig)
@@ -51,7 +51,7 @@ class JoystickEvent(Structure):
                 ("number", c_uint8)]
 
 current_time = 0.1
-TIME_STEP = 0.0201
+TIME_STEP = 0.05
 COMPUTE_TIME = 0.02
 
 fd = os.open("/dev/input/js0", os.O_RDONLY | os.O_NONBLOCK)
@@ -60,13 +60,22 @@ while plt.get_fignums():
     plt.pause(TIME_STEP - COMPUTE_TIME)
     current_time += TIME_STEP
     update_drone(current_time, cmd_vel, drone, controller, [line1, line2])
-    try:
-        data = os.read(fd, ctypes.sizeof(JoystickEvent))
-    except:
-        continue
-    event = JoystickEvent.from_buffer_copy(data)
-    if (event.number == 0):
-        cmd_vel[0] = -1*event.value/3000
-    if (event.number == 1):
-        cmd_vel[1] = event.value/3000
+    done = 0
+    while done == 0:
+        try:
+            data = os.read(fd, ctypes.sizeof(JoystickEvent))
+        except:
+            done = 1
+            continue
+        event = JoystickEvent.from_buffer_copy(data)
+        if (event.number == 0):
+            cmd_vel[0] = -1*event.value/3000
+        if (event.number == 1):
+            cmd_vel[1] = event.value/3000
+        if (event.number == 0 and event.type == 1):
+            if (event.value <= 1):
+                cmd_vel[2] = -1*event.value*2
+        if (event.number == 2 and event.type == 1):
+            if (event.value <= 1):
+                cmd_vel[2] = event.value*2
     
