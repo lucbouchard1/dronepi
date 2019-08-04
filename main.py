@@ -49,8 +49,8 @@ ax.set_ylim3d((-10, 10))
 ax.set_zlim3d((-10, 10))
 
 times = np.arange(0.1, 100, 0.1)
-ctrl_vels = np.array([[10, 0, 0] for t in times])
-
+ctrl_vels = np.array([[-5 + 10*np.ceil(np.sin(t/1)), 0, 0] for t in times])
+print(ctrl_vels)
 # Creating the Animation object
 line_ani = animation.FuncAnimation(fig, update_drone, len(times), fargs=(times, ctrl_vels, drone, controller, [line1, line2]),
                                    interval=100, blit=False)
