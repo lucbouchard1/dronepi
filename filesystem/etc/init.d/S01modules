@@ -1,0 +1,2 @@
+echo "Enabling WIFI kernel module"
+modprobe brcmfmac
