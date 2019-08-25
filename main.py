@@ -52,7 +52,7 @@ class JoystickEvent(Structure):
 
 current_time = 0.1
 TIME_STEP = 0.05
-COMPUTE_TIME = 0.02
+COMPUTE_TIME = 0.0003
 
 fd = os.open("/dev/input/js0", os.O_RDONLY | os.O_NONBLOCK)
 update_drone(current_time, cmd_vel, drone, controller, [line1, line2])
